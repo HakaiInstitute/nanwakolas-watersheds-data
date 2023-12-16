@@ -1,0 +1,91 @@
+data-qc-plain-language
+    
+The code starts by transforming the data frame from wide to long-format by selecting columns containing the string pattern "Avg." It then pivots them into a long format with the sensor names in the "Sensor" column and the corresponding measurement values in the "Variable" column.
+
+It then creates a new data frame "df_qc" by adding several calculated columns which are used to classify data based on various conditions.
+
+The code further transforms "df_qc" into long format and selects specific columns, only keeping rows pertaining to the specific variable being examined -- in this case it is water temperature ("TWtr"). The resulting data frame is named df_long_qc.
+
+Three new data frames are then created by filtering the long format data frame based on different conditions for the "qc_flag" column. data_svc contains rows where "qc_flag" contains "SVC," data_av contains rows where "qc_flag" contains "AV," and data_mv contains rows where "qc_flag" contains "MV."
+
++--------------------------------------------------+
+|                                                |
+|               Start of Workflow                |
+|                                                |
++---------------------+---------------------+------+
+                      |
+                      |
+                      |
+                      v
++------------------->+-------------------+------+
+|                  |                   |      |
+|  Load and Preprocess Data (df) |       |
+|                  |                   |      |
++------------------+-------------------+      |
+                      |                       |
+                      |                       |
+                      v                       |
++------------------->+-------------------+------+
+|                  |                   |      |
+|  Transform Data into Long Format (df_long) |
+|                  |                   |      |
++------------------+-------------------+      |
+                      |                       |
+                      |                       |
+                      v                       |
++------------------->+-------------------+------+
+|                  |                   |      |
+|  Apply QC Checks (df_qc)               |
+|                  |                   |      |
++------------------+-------------------+      |
+                      |                       |
+                      |                       |
+                      v                       |
++------------------->+-------------------+------+
+|                  |                   |      |
+|  Transform Data into Long Format (df_long_qc) |
+|                  |                   |      |
++------------------+-------------------+      |
+                      |                       |
+                      |                       |
+                      v                       |
++------------------->+-------------------+------+
+|                  |                   |      |
+|  Filter TWtr Sensors (df_long_qc) |
+|                  |                   |      |
++------------------+-------------------+      |
+                      |                       |
+                      |                       |
+                      v                       |
++------------------->+-------------------+------+
+|                  |                   |      |
+|  Create Data: SVC (data_svc)        |
+|                  |                   |      |
++------------------+-------------------+      |
+                      |                       |
+                      |                       |
+                      v                       |
++------------------->+-------------------+------+
+|                  |                   |      |
+|  Create Data: AV (data_av)          |
+|                  |                   |      |
++------------------+-------------------+      |
+                      |                       |
+                      |                       |
+                      v                       |
++------------------->+-------------------+------+
+|                  |                   |      |
+|  Create Data: MV (data_mv)          |
+|                  |                   |      |
++------------------+-------------------+------+
+                      |                       |
+                      |                       |
+                      v
++---------------------+---------------------+
+|                  |
+|    End of Workflow |
+|                  |
++---------------------+
+
+
+

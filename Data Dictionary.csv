@@ -1,0 +1,21 @@
+column,description ,,
+date,yyyy-mm-dd hh:mm,,
+quality_level,quality level assigned to each record ,,
+quality_flag,appended quality flags assigned to each record over time -- when read from left to right the leftmost flag is the most recently assigned,,
+sensor,type of sensor ,,
+value,measured variable,,
+,,,
+,,,
+sensor,type ,measurement,units
+pt,Hobo U20 -04,depth,m
+twtr,Hobo U20 -04,water temperature,°C
+tb1,Hobo Tidbit V2,water temperature,°C
+,,,
+,,,
+hakai quality flags ,,,
+code,name,description,
+AV,Accepted Value,Value has been assessed and deemed acceptable by technician,
+EV,Estimated Value,Value estimated denoted by an explantory flag.,
+SVD,Suspicious Value Delete,Value is clearly suspect and should be discarded,
+SVC,Suspicious Value Caution,"Value appears suspect, use with caution",
+MV,Missing value,No measured value available because of equipment failure etc. ,
