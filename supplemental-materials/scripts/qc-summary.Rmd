@@ -29,7 +29,7 @@ library(kableExtra)
 
 
 ## Set working directory
-opts_knit$set(root.dir = "~/git-repos/nanwakolas-watersheds-timeseries/")
+opts_knit$set(root.dir = "~/git-repos/nanwakolas-watersheds-data/")
 
 ```
 
@@ -107,69 +107,54 @@ glimpse(tuna)
 colnames(tuna)[1] <- "date"
 tuna$date<-as.POSIXct(tuna$date, format="%Y-%m-%d %H:%M")
 
-#check structure
-str(tuna)
+# Filtered Depth Data
+filtered_depth <- tuna %>%
+  filter(depth_tuna1pt_qlevel != 1)
+# Filtered Temperature Data
+filtered_temp <- tuna %>%
+  filter(twtr_tuna1pt_qlevel != 1)
+# Filtered Tidbit Data
+filtered_tidbit <- tuna %>%
+  filter(twtr_tuna1_tb1_qlevel != 1)
 
-#separate into variable data frames
-depth<-tuna %>% 
-  select("date", contains("depth"))
-tidbit<-tuna %>% 
-  select("date", contains("tb"))
-temp<-tuna %>% 
-  select("date", contains("twtr"))
-
-#count flags for previously qc'd depth data       
-SV <- "SVD"
-SV_depth <- sum(grepl(SV, depth$depth_tuna1pt_qflag))
-
-AV <- "AV"
-AV_depth <- sum(grepl(AV, depth$depth_tuna1pt_qflag))
-
-MV <- "MV"
-MV_depth <- sum(grepl(MV, depth$depth_tuna1pt_qflag))
-
-first_date <- depth$date[1]
-last_date <- depth$date[nrow(depth)]
-
-#count flags for previously qc'd temp data  
-total_rows <- nrow(temp)
-SV_temp <- sum(grepl(SV, temp$twtr_tuna1pt_qflag))
-AV_temp <- sum(grepl(AV, temp$twtr_tuna1pt_qflag))
-MV_temp <- sum(grepl(MV, temp$twtr_tuna1pt_qflag))
-
-first_date_temp <- temp$date[1]
-last_date_temp <- temp$date[nrow(temp)]
-
-#count flags for previously qc'd tidbit data  
-tidbit_cleaned<-na.omit(tidbit)
-total_rows <- nrow(tidbit_cleaned)
-SV_tid <- sum(grepl(SV, tidbit_cleaned$twtr_tuna1_tb1_qflag))
-AV_tid <- sum(grepl(AV, tidbit_cleaned$twtr_tuna1_tb1_qflag))
-MV_tid <- sum(grepl(MV, tidbit_cleaned$twtr_tuna1_tb1_qflag))
-
-# Define the start and end dates for the date range
-first_date_tid <- temp$date[1]
-last_date_tid <- temp$date[nrow(tidbit_cleaned)]
-
-
-str(tuna)
-
-```
-
-
-```{r tuna_table_prep,  include=FALSE}
-
-# Create a new dataframe
-combined_tuna <- data.frame(
-  Variable = c("PT_depth", "PT_temp", "Tidbit_temp"),
-  Start_date = c(first_date, first_date_temp, first_date_tid),
-  End_date = c(last_date, last_date_temp, last_date_tid),
-  AV = c(AV_depth, AV_temp, AV_tid),
-  SV = c(SV_depth, SV_temp, SV_tid),
-  MV = c(MV_depth, MV_temp, MV_tid),
-  Total_records = c(nrow(depth), nrow(temp), nrow(tidbit_cleaned))
+# Combine Pattern Counts for All Variables
+combined_tuna_counts <- data.frame(
+  Variable = c("Depth", "Temperature", "Tidbit"),
+  AV = c(
+    sum(filtered_depth$depth_tuna1pt_qflag == "AV"),
+    sum(filtered_temp$twtr_tuna1pt_qflag == "AV"),
+    sum(filtered_tidbit$twtr_tuna1_tb1_qflag == "AV")
+  ),
+  MV = c(
+    sum(filtered_depth$depth_tuna1pt_qflag == "MV"),
+    sum(filtered_temp$twtr_tuna1pt_qflag == "MV"),
+    sum(filtered_tidbit$twtr_tuna1_tb1_qflag == "MV")
+  ),
+  EV = c(
+    sum(filtered_depth$depth_tuna1pt_qflag == "EV"),
+    sum(filtered_temp$twtr_tuna1pt_qflag == "EV"),
+    sum(filtered_tidbit$twtr_tuna1_tb1_qflag == "EV")
+  ),
+  SVD = c(
+    sum(filtered_depth$depth_tuna1pt_qflag == "SVD"),
+    sum(filtered_temp$twtr_tuna1pt_qflag == "SVD"),
+    sum(filtered_tidbit$twtr_tuna1_tb1_qflag == "SVD")
+  ),
+  SVC = c(
+    sum(filtered_depth$depth_tuna1pt_qflag == "SVC"),
+    sum(filtered_temp$twtr_tuna1pt_qflag == "SVC"),
+    sum(filtered_tidbit$twtr_tuna1_tb1_qflag == "SVC")
+  ),
+  Total = c(
+    nrow(filtered_depth),
+    nrow(filtered_temp),
+    nrow(filtered_tidbit)
+  )
 )
 
+
+first_date <- min(as.POSIXct(tuna$date))
+last_date <- max(as.POSIXct(tuna$date))
 
 
 ```
@@ -250,7 +235,7 @@ plotly_tuna
 
 ```{r tuna_table, include=TRUE, results='asis'}
 
-tuna_table<-kable(combined_tuna, format = "markdown", caption="Table 1. Quality control flag count summary for Tuna River.") 
+tuna_table<-kable(combined_tuna_counts, format = "markdown", caption="Table 1. Quality control flag count summary for Tuna River.") 
   
 tuna_table
 
@@ -279,72 +264,53 @@ glimpse(lull)
 colnames(lull)[1] <- "date"
 lull$date<-as.POSIXct(lull$date, format="%Y-%m-%d %H:%M")
 
-#check structure
-str(lull)
+# Filtered Depth Data
+filtered_depth <- lull %>%
+  filter(depth_lull1pt_qlevel != 1)
+# Filtered Temperature Data
+filtered_temp <- lull %>%
+  filter(twtr_lull1pt_qlevel != 1)
+# Filtered Tidbit Data
+filtered_tidbit <- lull %>%
+  filter(twtr_lull1_tb1_qlevel != 1)
 
-#separate into variable data frames
-depth<-lull %>% 
-  select("date", contains("depth"))
-tidbit<-lull %>% 
-  select("date", contains("tb"))
-temp<-lull %>% 
-  select("date", contains("twtr"))
-
-#count flags for previously qc'd depth data       
-SV <- "SVD"
-SV_depth <- sum(grepl(SV, depth$depth_lull1pt_qflag))
-
-AV <- "AV"
-AV_depth <- sum(grepl(AV, depth$depth_lull1pt_qflag))
-
-MV <- "MV"
-MV_depth <- sum(grepl(MV, depth$depth_lull1pt_qflag))
-
-first_date <- depth$date[1]
-last_date <- depth$date[nrow(depth)]
-
-#count flags for previously qc'd temp data  
-total_rows <- nrow(temp)
-SV_temp <- sum(grepl(SV, temp$twtr_lull1pt_qflag))
-AV_temp <- sum(grepl(AV, temp$twtr_lull1pt_qflag))
-MV_temp <- sum(grepl(MV, temp$twtr_lull1pt_qflag))
-
-first_date_temp <- temp$date[1]
-last_date_temp <- temp$date[nrow(temp)]
-
-#count flags for previously qc'd tidbit data  
-tidbit_cleaned<-na.omit(tidbit)
-total_rows <- nrow(tidbit_cleaned)
-SV_tid <- sum(grepl(SV, tidbit_cleaned$twtr_lull1_tb1_qflag))
-AV_tid <- sum(grepl(AV, tidbit_cleaned$twtr_lull1_tb1_qflag))
-MV_tid <- sum(grepl(MV, tidbit_cleaned$twtr_lull1_tb1_qflag))
-
-# Define the start and end dates for the date range
-first_date_tid <- temp$date[1]
-last_date_tid <- temp$date[nrow(tidbit_cleaned)]
-
-
-str(lull)
-
-
-```
-
-
-
-
-```{r lull_creation,  include=FALSE}
-
-# Create a new dataframe
-combined_lull <- data.frame(
-  Variable = c("PT_depth", "PT_temp", "Tidbit_temp"),
-  Start_date = c(first_date, first_date_temp, first_date_tid),
-  End_date = c(last_date, last_date_temp, last_date_tid),
-  AV = c(AV_depth, AV_temp, AV_tid),
-  SV = c(SV_depth, SV_temp, SV_tid),
-  MV = c(MV_depth, MV_temp, MV_tid),
-  Total_records = c(nrow(depth), nrow(temp), nrow(tidbit_cleaned))
+# Combine Pattern Counts for All Variables
+combined_lull_counts <- data.frame(
+  Variable = c("Depth", "Temperature", "Tidbit"),
+  AV = c(
+    sum(filtered_depth$depth_lull1pt_qflag == "AV"),
+    sum(filtered_temp$twtr_lull1pt_qflag == "AV"),
+    sum(filtered_tidbit$twtr_lull1_tb1_qflag == "AV")
+  ),
+  MV = c(
+    sum(filtered_depth$depth_lull1pt_qflag == "MV"),
+    sum(filtered_temp$twtr_lull1pt_qflag == "MV"),
+    sum(filtered_tidbit$twtr_lull1_tb1_qflag == "MV")
+  ),
+  EV = c(
+    sum(filtered_depth$depth_lull1pt_qflag == "EV"),
+    sum(filtered_temp$twtr_lull1pt_qflag == "EV"),
+    sum(filtered_tidbit$twtr_lull1_tb1_qflag == "EV")
+  ),
+  SVD = c(
+    sum(filtered_depth$depth_lull1pt_qflag == "SVD"),
+    sum(filtered_temp$twtr_lull1pt_qflag == "SVD"),
+    sum(filtered_tidbit$twtr_lull1_tb1_qflag == "SVD")
+  ),
+  SVC = c(
+    sum(filtered_depth$depth_lull1pt_qflag == "SVC"),
+    sum(filtered_temp$twtr_lull1pt_qflag == "SVC"),
+    sum(filtered_tidbit$twtr_lull1_tb1_qflag == "SVC")
+  ),
+  Total = c(
+    nrow(filtered_depth),
+    nrow(filtered_temp),
+    nrow(filtered_tidbit)
+  )
 )
 
+first_date <- min(as.POSIXct(lull$date))
+last_date <- max(as.POSIXct(lull$date))
 
 
 
@@ -375,7 +341,7 @@ combined_lull <- data.frame(
 
 ```{r lull_table, include=TRUE, results='asis'}
 
-lull_table<-kable(combined_lull, format = "markdown", caption="Table 2. Quality control flag count summary for Fulmore River.") 
+lull_table<-kable(combined_lull_counts, format = "markdown", caption="Table 2. Quality control flag count summary for Fulmore River.") 
   
 lull_table
 
@@ -458,78 +424,59 @@ glimpse(full)
 colnames(full)[1] <- "date"
 full$date<-as.POSIXct(full$date, format="%Y-%m-%d %H:%M")
 
-#check structure
-str(full)
+# Filtered Depth Data
+filtered_depth <- full %>%
+  filter(depth_full1pt_qlevel != 1)
+# Filtered Temperature Data
+filtered_temp <- full %>%
+  filter(twtr_full1pt_qlevel != 1)
+# Filtered Tidbit Data
+filtered_tidbit <- full %>%
+  filter(twtr_full1_tb1_qlevel != 1)
 
-#separate into variable data frames
-depth<-full %>% 
-  select("date", contains("depth"))
-tidbit<-full %>% 
-  select("date", contains("tb"))
-temp<-full %>% 
-  select("date", contains("twtr"))
-
-#count flags for previously qc'd depth data       
-SV <- "SVD"
-SV_depth <- sum(grepl(SV, depth$depth_full1pt_qflag))
-
-AV <- "AV"
-AV_depth <- sum(grepl(AV, depth$depth_full1pt_qflag))
-
-MV <- "MV"
-MV_depth <- sum(grepl(MV, depth$depth_full1pt_qflag))
-
-first_date <- depth$date[1]
-last_date <- depth$date[nrow(depth)]
-
-#count flags for previously qc'd temp data  
-total_rows <- nrow(temp)
-SV_temp <- sum(grepl(SV, temp$twtr_full1pt_qflag))
-AV_temp <- sum(grepl(AV, temp$twtr_full1pt_qflag))
-MV_temp <- sum(grepl(MV, temp$twtr_full1pt_qflag))
-
-first_date_temp <- temp$date[1]
-last_date_temp <- temp$date[nrow(temp)]
-
-#count flags for previously qc'd tidbit data  
-tidbit_cleaned<-na.omit(tidbit)
-total_rows <- nrow(tidbit_cleaned)
-SV_tid <- sum(grepl(SV, tidbit_cleaned$twtr_full1_tb1_qflag))
-AV_tid <- sum(grepl(AV, tidbit_cleaned$twtr_full1_tb1_qflag))
-MV_tid <- sum(grepl(MV, tidbit_cleaned$twtr_full1_tb1_qflag))
-
-# Define the start and end dates for the date range
-first_date_tid <- temp$date[1]
-last_date_tid <- temp$date[nrow(tidbit_cleaned)]
-
-
-str(full)
-
-
-```
-
-
-
-
-
-
-```{r full_creation,  include=FALSE}
-
-# Create a new dataframe
-combined_full <- data.frame(
-  Variable = c("PT_depth", "PT_temp", "Tidbit_temp"),
-  Start_date = c(first_date, first_date_temp, first_date_tid),
-  End_date = c(last_date, last_date_temp, last_date_tid),
-  AV = c(AV_depth, AV_temp, AV_tid),
-  SV = c(SV_depth, SV_temp, SV_tid),
-  MV = c(MV_depth, MV_temp, MV_tid),
-  Total_records = c(nrow(depth), nrow(temp), nrow(tidbit_cleaned))
+# Combine Pattern Counts for All Variables
+combined_full_counts <- data.frame(
+  Variable = c("Depth", "Temperature", "Tidbit"),
+  AV = c(
+    sum(filtered_depth$depth_full1pt_qflag == "AV"),
+    sum(filtered_temp$twtr_full1pt_qflag == "AV"),
+    sum(filtered_tidbit$twtr_full1_tb1_qflag == "AV")
+  ),
+  MV = c(
+    sum(filtered_depth$depth_full1pt_qflag == "MV"),
+    sum(filtered_temp$twtr_full1pt_qflag == "MV"),
+    sum(filtered_tidbit$twtr_full1_tb1_qflag == "MV")
+  ),
+  EV = c(
+    sum(filtered_depth$depth_full1pt_qflag == "EV"),
+    sum(filtered_temp$twtr_full1pt_qflag == "EV"),
+    sum(filtered_tidbit$twtr_full1_tb1_qflag == "EV")
+  ),
+  SVD = c(
+    sum(filtered_depth$depth_full1pt_qflag == "SVD"),
+    sum(filtered_temp$twtr_full1pt_qflag == "SVD"),
+    sum(filtered_tidbit$twtr_full1_tb1_qflag == "SVD")
+  ),
+  SVC = c(
+    sum(filtered_depth$depth_full1pt_qflag == "SVC"),
+    sum(filtered_temp$twtr_full1pt_qflag == "SVC"),
+    sum(filtered_tidbit$twtr_full1_tb1_qflag == "SVC")
+  ),
+  Total = c(
+    nrow(filtered_depth),
+    nrow(filtered_temp),
+    nrow(filtered_tidbit)
+  )
 )
 
 
+first_date <- min(as.POSIXct(full$date))
+last_date <- max(as.POSIXct(full$date))
 
 
 ```
+
+
 
 ## Fulmore River Overview
 
@@ -550,7 +497,7 @@ The installation was established on 2018-08-28 and is located on a large boulder
 
 ```{r ful_table, include=TRUE, results='asis'}
 
-ful_table<-kable(combined_full, format = "markdown", caption="Table 2. Quality control flag count summary for Fulmore River.") 
+ful_table<-kable(combined_full_counts, format = "markdown", caption="Table 2. Quality control flag count summary for Fulmore River.") 
   
 ful_table
 
@@ -634,76 +581,57 @@ glimpse(heyd)
 colnames(heyd)[1] <- "date"
 heyd$date<-as.POSIXct(heyd$date, format="%Y-%m-%d %H:%M")
 
-#check structure
-str(heyd)
+# Filtered Depth Data
+filtered_depth <- heyd %>%
+  filter(depth_heyd2pt_qlevel != 1)
+# Filtered Temperature Data
+filtered_temp <- heyd %>%
+  filter(twtr_heyd2pt_qlevel != 1)
+# Filtered Tidbit Data
+filtered_tidbit <- heyd %>%
+  filter(twtr_heyd1_tb1_qlevel != 1)
 
-#separate into variable data frames
-depth<-heyd %>% 
-  select("date", contains("depth"))
-tidbit<-heyd %>% 
-  select("date", contains("tb"))
-temp<-heyd %>% 
-  select("date", contains("twtr"))
-
-#count flags for previously qc'd depth data       
-SV <- "SVD"
-SV_depth <- sum(grepl(SV, depth$depth_heyd2pt_qflag))
-
-AV <- "AV"
-AV_depth <- sum(grepl(AV, depth$depth_heyd2pt_qflag))
-
-MV <- "MV"
-MV_depth <- sum(grepl(MV, depth$depth_heyd2pt_qflag))
-
-first_date <- depth$date[1]
-last_date <- depth$date[nrow(depth)]
-
-#count flags for previously qc'd temp data  
-total_rows <- nrow(temp)
-SV_temp <- sum(grepl(SV, temp$twtr_heyd2pt_qflag))
-AV_temp <- sum(grepl(AV, temp$twtr_heyd2pt_qflag))
-MV_temp <- sum(grepl(MV, temp$twtr_heyd2pt_qflag))
-
-first_date_temp <- temp$date[1]
-last_date_temp <- temp$date[nrow(temp)]
-
-#count flags for previously qc'd tidbit data  
-tidbit_cleaned<-na.omit(tidbit)
-total_rows <- nrow(tidbit_cleaned)
-SV_tid <- sum(grepl(SV, tidbit_cleaned$twtr_heyd1_tb1_qflag))
-AV_tid <- sum(grepl(AV, tidbit_cleaned$twtr_heyd1_tb1_qflag))
-MV_tid <- sum(grepl(MV, tidbit_cleaned$twtr_heyd1_tb1_qflag))
-
-# Define the start and end dates for the date range
-first_date_tid <- temp$date[1]
-last_date_tid <- temp$date[nrow(tidbit_cleaned)]
-
-
-str(heyd)
-
-
-```
-
-
-
-
-```{r heyd_creation,  include=FALSE}
-
-# Create a new dataframe
-combined_heyd <- data.frame(
-  Variable = c("PT_depth", "PT_temp", "Tidbit_temp"),
-  Start_date = c(first_date, first_date_temp, first_date_tid),
-  End_date = c(last_date, last_date_temp, last_date_tid),
-  AV = c(AV_depth, AV_temp, AV_tid),
-  SV = c(SV_depth, SV_temp, SV_tid),
-  MV = c(MV_depth, MV_temp, MV_tid),
-  Total_records = c(nrow(depth), nrow(temp), nrow(tidbit_cleaned))
+# Combine Pattern Counts for All Variables
+combined_heyd_counts <- data.frame(
+  Variable = c("Depth", "Temperature", "Tidbit"),
+  AV = c(
+    sum(filtered_depth$depth_heyd2pt_qflag == "AV"),
+    sum(filtered_temp$twtr_heyd2pt_qflag == "AV"),
+    sum(filtered_tidbit$twtr_heyd1_tb1_qflag == "AV")
+  ),
+  MV = c(
+    sum(filtered_depth$depth_heyd2pt_qflag == "MV"),
+    sum(filtered_temp$twtr_heyd2pt_qflag == "MV"),
+    sum(filtered_tidbit$twtr_heyd1_tb1_qflag == "MV")
+  ),
+  EV = c(
+    sum(filtered_depth$depth_heyd2pt_qflag == "EV"),
+    sum(filtered_temp$twtr_heyd2pt_qflag == "EV"),
+    sum(filtered_tidbit$twtr_heyd1_tb1_qflag == "EV")
+  ),
+  SVD = c(
+    sum(filtered_depth$depth_heyd2pt_qflag == "SVD"),
+    sum(filtered_temp$twtr_heyd2pt_qflag == "SVD"),
+    sum(filtered_tidbit$twtr_heyd1_tb1_qflag == "SVD")
+  ),
+  SVC = c(
+    sum(filtered_depth$depth_heyd2pt_qflag == "SVC"),
+    sum(filtered_temp$twtr_heyd2pt_qflag == "SVC"),
+    sum(filtered_tidbit$twtr_heyd1_tb1_qflag == "SVC")
+  ),
+  Total = c(
+    nrow(filtered_depth),
+    nrow(filtered_temp),
+    nrow(filtered_tidbit)
+  )
 )
 
-
-
+first_date <- min(as.POSIXct(heyd$date))
+last_date <- max(as.POSIXct(heyd$date))
 
 ```
+
+
 
 ## Heydon River Overview
 
@@ -718,7 +646,7 @@ The installation was established on 2018-09-26 and located ~50m downstream of th
 
 ```{r heyd_table, include=TRUE, results='asis'}
 
-heyd_table<-kable(combined_heyd, format = "markdown", caption="Table 3. Quality control flag count summary for Heydon River.") 
+heyd_table<-kable(combined_heyd_counts, format = "markdown", caption="Table 3. Quality control flag count summary for Heydon River.") 
   
 heyd_table
 
@@ -801,70 +729,47 @@ glimpse(glen)
 colnames(glen)[1] <- "date"
 glen$date<-as.POSIXct(glen$date, format="%Y-%m-%d %H:%M")
 
-#check structure
-str(glen)
-
-#separate into variable data frames
-depth<-glen %>% 
-  select("date", contains("depth"))
-tidbit<-glen %>% 
-  select("date", contains("tb"))
-temp<-glen %>% 
-  select("date", contains("twtr"))
-
-#count flags for previously qc'd depth data       
-SV <- "SVD"
-SV_depth <- sum(grepl(SV, depth$depth_glen1pt_qflag))
-
-AV <- "AV"
-AV_depth <- sum(grepl(AV, depth$depth_glen1pt_qflag))
-
-MV <- "MV"
-MV_depth <- sum(grepl(MV, depth$depth_glen1pt_qflag))
-
-first_date <- depth$date[1]
-last_date <- depth$date[nrow(depth)]
-
-#count flags for previously qc'd temp data  
-total_rows <- nrow(temp)
-SV_temp <- sum(grepl(SV, temp$twtr_glen1pt_qflag))
-AV_temp <- sum(grepl(AV, temp$twtr_glen1pt_qflag))
-MV_temp <- sum(grepl(MV, temp$twtr_glen1pt_qflag))
-
-first_date_temp <- temp$date[1]
-last_date_temp <- temp$date[nrow(temp)]
-
-#count flags for previously qc'd tidbit data  
-tidbit_cleaned<-na.omit(tidbit)
-total_rows <- nrow(tidbit_cleaned)
-SV_tid <- sum(grepl(SV, tidbit_cleaned$twtr_glen1_tb1_qflag))
-AV_tid <- sum(grepl(AV, tidbit_cleaned$twtr_glen1_tb1_qflag))
-MV_tid <- sum(grepl(MV, tidbit_cleaned$twtr_glen1_tb1_qflag))
-
-# Define the start and end dates for the date range
-first_date_tid <- temp$date[1]
-last_date_tid <- temp$date[nrow(tidbit_cleaned)]
+# Filtered Depth Data
+filtered_depth <- glen %>%
+  filter(depth_glen1pt_qlevel != 1)
+# Filtered Temperature Data
+filtered_temp <- glen %>%
+  filter(twtr_glen1pt_qlevel != 1)
 
 
-str(glen)
-
-
-```
-
-
-
-```{r glen_creation,  include=FALSE}
-
-# Create a new dataframe
-combined_glen <- data.frame(
-  Variable = c("PT_depth", "PT_temp", "Tidbit_temp"),
-  Start_date = c(first_date, first_date_temp, first_date_tid),
-  End_date = c(last_date, last_date_temp, last_date_tid),
-  AV = c(AV_depth, AV_temp, AV_tid),
-  SV = c(SV_depth, SV_temp, SV_tid),
-  MV = c(MV_depth, MV_temp, MV_tid),
-  Total_records = c(nrow(depth), nrow(temp), nrow(tidbit_cleaned))
+# Combine Pattern Counts for All Variables
+combined_glen_counts <- data.frame(
+  Variable = c("Depth", "Temperature"),
+  AV = c(
+    sum(filtered_depth$depth_glen1pt_qflag == "AV"),
+    sum(filtered_temp$twtr_glen1pt_qflag == "AV")
+  ),
+  MV = c(
+    sum(filtered_depth$depth_glen1pt_qflag == "MV"),
+    sum(filtered_temp$twtr_glen1pt_qflag == "MV")
+  ),
+  EV = c(
+    sum(filtered_depth$depth_glen1pt_qflag == "EV"),
+    sum(filtered_temp$twtr_glen1pt_qflag == "EV")
+  ),
+  SVD = c(
+    sum(filtered_depth$depth_glen1pt_qflag == "SVD"),
+    sum(filtered_temp$twtr_glen1pt_qflag == "SVD")
+  ),
+  SVC = c(
+    sum(filtered_depth$depth_glen1pt_qflag == "SVC"),
+    sum(filtered_temp$twtr_full1pt_qflag == "SVC")
+  ),
+  Total = c(
+    nrow(filtered_depth),
+    nrow(filtered_temp)
+   
+  )
 )
+
+first_date <- min(as.POSIXct(glen$date))
+last_date <- max(as.POSIXct(glen$date))
+
 ```
 
 
@@ -887,7 +792,7 @@ The installation is located under a bridge and experienced severe buildup from s
 
 ```{r glen_table, include=TRUE, results='asis'}
 
-glen_table<-kable(combined_glen, format = "markdown", caption="Table 4. Quality control flag count summary for Glendale River.") 
+glen_table<-kable(combined_glen_counts, format = "markdown", caption="Table 4. Quality control flag count summary for Glendale River.") 
   
 glen_table
 
