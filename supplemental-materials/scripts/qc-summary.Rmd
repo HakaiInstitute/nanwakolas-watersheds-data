@@ -49,22 +49,6 @@ Accompanying background documents detailing installation methods, locations, and
 
 ## QC methods
 
-```{r record_length, echo = TRUE, eval=FALSE}
-df_qc<-df %>% 
-  mutate(temp_diff = lead(TWtr2SSNUS_Avg)-lag(TWtr2SSNUS_Avg),
-         temp_diff2 = lead(TWtr2SSNUS_Avg)-lag(TWtr2SSNUS_Avg),
-         qc_flag = case_when(is.na(TWtrSSNUS_Avg) ~ "MV: QC'd by EH"
-                             ,temp_diff > 1 ~ "SVC: Rate of change exceedance: QC'd by EH"
-                             ,temp_diff2 > 1 ~ "SVC: Rate of change exceedance: QC'd by EH"
-                             ,is.na(TWtr2SSNUS_Avg) ~ "MV: QC'd by EH"
-                             ,WtrLvlSSNUS_Avg < 0.03 ~  "SVC: Dewatering potential: QC'd by EH"
-                             ,WtrLvl2SNUS_Avg < 0.03 ~ "SVC: Dewatering potential: QC'd by EH"
-                             ,TWtrSSNUS_Avg == TAirSSN_Avg ~ "SVC: Dewatering potential: QC'd by EH"
-                             ,TWtr2SSNUS_Avg == TAirSSN_Avg ~ "SVC: Dewatering potential: QC'd by EH"
-                             ,TRUE ~ "AV:QC'd by EH"))
-
-```
-
 
 The following depicts the typical methodology applied to create the stream stage, and temperature time-series data package which uses 5-minute average measurements that are quality controlled (QC’d), flagged and corrected where needed (Table 1-4) outlined below: 
 
@@ -341,7 +325,7 @@ last_date <- max(as.POSIXct(lull$date))
 
 ```{r lull_table, include=TRUE, results='asis'}
 
-lull_table<-kable(combined_lull_counts, format = "markdown", caption="Table 2. Quality control flag count summary for Fulmore River.") 
+lull_table<-kable(combined_lull_counts, format = "markdown", caption="Table 2. Quality control flag count summary for Lull Creek.") 
   
 lull_table
 
