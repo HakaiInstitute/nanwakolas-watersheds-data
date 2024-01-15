@@ -46,6 +46,8 @@ Accompanying background documents detailing installation methods, locations, and
 "Status Update for Nanwakolas Watersheds 2021-06-22"
 "Updates to the Lull Creek Observation Station 2023-06-27"
 
+`r paste("First created on 2023-04-27. Updated on", Sys.Date())`
+
 
 ## QC methods
 
@@ -83,13 +85,20 @@ colnames(tuna) <- fileheaders
 names(tuna)
 glimpse(tuna)
 
+
+first_date <- min(as.POSIXct(tuna$date, format="%Y-%m-%d %H:%M"))
+last_date <- max(as.POSIXct(tuna$date, format="%Y-%m-%d %H:%M"))
+
+
 ```
 
 
-```{r tuna_wrangling, include=FALSE}
 
+
+```{r tuna_wrangling, include=FALSE}
 colnames(tuna)[1] <- "date"
 tuna$date<-as.POSIXct(tuna$date, format="%Y-%m-%d %H:%M")
+
 
 # Filtered Depth Data
 filtered_depth <- tuna %>%
@@ -136,11 +145,8 @@ combined_tuna_counts <- data.frame(
   )
 )
 
-
-first_date <- min(as.POSIXct(tuna$date))
-last_date <- max(as.POSIXct(tuna$date))
-
-
+first_date<-tuna[1,1]
+last_date <- tuna[526330,1]
 ```
 
 
@@ -148,7 +154,6 @@ last_date <- max(as.POSIXct(tuna$date))
 
  The installation is located under a bridge and experienced potential influence from sediment buildup in the PVC housing until the PVC was swapped for a slotted version on 2022-06-20. The sensors logged on 10 minute intervals until 2022-06-20 at which point they were changed to log on 30 minute intervals to lessen download frequency. The sensors are typically downloaded 1 to 2 times per year. This data set reflects the current time series from `r first_date` to `r last_date` with `r nrow(tuna)` measurements. Data is also stored and available for viewing on the Hakai sensor network. 
 
-`r paste("First created on 2023-04-27. Updated on", Sys.Date())`
 
 ## Tuna Metadata 
 
@@ -293,9 +298,8 @@ combined_lull_counts <- data.frame(
   )
 )
 
-first_date <- min(as.POSIXct(lull$date))
-last_date <- max(as.POSIXct(lull$date))
-
+first_date<-lull[1,1]
+last_date <- lull[525732,1]
 
 
 ```
@@ -454,8 +458,8 @@ combined_full_counts <- data.frame(
 )
 
 
-first_date <- min(as.POSIXct(full$date))
-last_date <- max(as.POSIXct(full$date))
+first_date<-full[1,1]
+last_date <- full[532033,1]
 
 
 ```
@@ -610,8 +614,8 @@ combined_heyd_counts <- data.frame(
   )
 )
 
-first_date <- min(as.POSIXct(heyd$date))
-last_date <- max(as.POSIXct(heyd$date))
+first_date<-heyd[1,1]
+last_date <- heyd[62332,1]
 
 ```
 
@@ -751,8 +755,8 @@ combined_glen_counts <- data.frame(
   )
 )
 
-first_date <- min(as.POSIXct(glen$date))
-last_date <- max(as.POSIXct(glen$date))
+first_date<-glen[1,1]
+last_date <- glen[185851,1]
 
 ```
 
